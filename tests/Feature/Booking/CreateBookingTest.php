@@ -6,6 +6,7 @@ namespace Tests\Feature\Booking;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -138,7 +139,7 @@ final class CreateBookingTest extends TestCase
 
     public function test_create_booking_validates_required_fields(): void
     {
-        $schoolId = \DB::table('schools')->insertGetId([
+        $schoolId = DB::table('schools')->insertGetId([
             'school_name' => 'Escola Teste',
             'school_code' => 'ETI001',
             'password' => Hash::make('school-secret'),
@@ -146,7 +147,7 @@ final class CreateBookingTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        \DB::table('users')->insert([
+        DB::table('users')->insert([
             'school_id' => $schoolId,
             'name' => 'Usuário',
             'email' => 'user@example.com',
@@ -178,7 +179,7 @@ final class CreateBookingTest extends TestCase
 
     public function test_create_booking_fails_with_invalid_school(): void
     {
-        $schoolId = \DB::table('schools')->insertGetId([
+        $schoolId = DB::table('schools')->insertGetId([
             'school_name' => 'Escola 1',
             'school_code' => 'ETI001',
             'password' => Hash::make('school-secret'),
@@ -186,7 +187,7 @@ final class CreateBookingTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        \DB::table('users')->insert([
+        DB::table('users')->insert([
             'school_id' => $schoolId,
             'name' => 'Usuário',
             'email' => 'user@example.com',
@@ -199,7 +200,7 @@ final class CreateBookingTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        \DB::table('resources')->insert([
+        DB::table('resources')->insert([
             'id' => 1,
             'school_id' => $schoolId,
             'category_id' => 1,
@@ -209,7 +210,7 @@ final class CreateBookingTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        \DB::table('class_groups')->insert([
+        DB::table('class_groups')->insert([
             'id' => 1,
             'school_id' => $schoolId,
             'name' => '1 Ano A',
@@ -218,7 +219,7 @@ final class CreateBookingTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        \DB::table('subjects')->insert([
+        DB::table('subjects')->insert([
             'id' => 1,
             'school_id' => $schoolId,
             'name' => 'Ciencias',
@@ -227,7 +228,7 @@ final class CreateBookingTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        \DB::table('lesson_slots')->insert([
+        DB::table('lesson_slots')->insert([
             'id' => 1,
             'school_id' => $schoolId,
             'lesson_number' => 1,
