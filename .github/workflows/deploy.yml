@@ -1,0 +1,111 @@
+name: Laravel API Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: reserva_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: pgsql,pdo_pgsql,redis
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Copy .env file
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run migrations
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_DATABASE: reserva_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+        run: php artisan migrate --force
+
+      - name: Run tests
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_DATABASE: reserva_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+        run: php artisan test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Deploy to Railway
+        uses: devtin/railway-action@v1.1.4
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        with:
+          serviceId: ${{ secrets.RAILWAY_SERVICE_ID }}
+          projectId: ${{ secrets.RAILWAY_PROJECT_ID }}
+
+      - name: Verify deployment
+        run: |
+          echo "Deploy iniciado!"
+          echo "Verifique o status em: https://railway.app"
+        if: success()
+
+      - name: Notify Slack (optional)
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: 'API Laravel Deploy: ${{ job.status }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author
+        continue-on-error: true
