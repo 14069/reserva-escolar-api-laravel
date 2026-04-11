@@ -45,6 +45,7 @@ final class ChangePasswordTest extends TestCase
     {
         $response = $this->postJson('/account/change-password', [
             'school_id' => 1,
+            'user_id' => 1,
             'current_password' => 'old123',
             'new_password' => 'new123',
         ]);
@@ -77,6 +78,7 @@ final class ChangePasswordTest extends TestCase
 
         $response = $this->postJson('/account/change-password', [
             'school_id' => $schoolId,
+            'user_id' => 1,
             'current_password' => 'wrong-password',
             'new_password' => 'new-password',
         ], [
@@ -84,7 +86,7 @@ final class ChangePasswordTest extends TestCase
         ]);
 
         $response
-            ->assertStatus(422)
+            ->assertStatus(401)
             ->assertJson([
                 'success' => false,
             ]);
@@ -116,8 +118,11 @@ final class ChangePasswordTest extends TestCase
             'updated_at' => now(),
         ]);
 
+        $userId = (int) DB::table('users')->where('email', 'user@example.com')->value('id');
+
         $response = $this->postJson('/account/change-password', [
             'school_id' => $schoolId,
+            'user_id' => $userId,
             'current_password' => $oldPassword,
             'new_password' => $newPassword,
         ], [

@@ -19,27 +19,11 @@ final class ResourceSecurityTest extends TestCase
         Schema::dropIfExists('schools');
     }
 
-    /**
-     * CRÍTICO: ResourceController::categories() não tem autenticação!
-     * Este teste falha porque categories() está sem proteção.
-     */
     public function test_categories_endpoint_should_require_authentication(): void
     {
-        // Este teste documenta um BUG: categories() está sem autenticação
-        
-        $response = $this->getJson('/resource-categories');
+        $response = $this->getJson('/resource-categories?school_id=1');
 
-        // Esperado: 401 (requer autenticação)
-        // Atual: 200 (sem protegido - SEGURANÇA COMPROMETIDA)
-        
-        // Descomente após fix:
-        // $response->assertStatus(401);
-        
-        // Documentar o bug:
-        $this->markTestSkipped(
-            'BUG CRÍTICO: ResourceController::categories() sem autenticação. '
-            . 'Isso deve ser corrigido no código.'
-        );
+        $response->assertStatus(401);
     }
 
     public function test_resource_creation_requires_technician_role(): void
@@ -65,6 +49,11 @@ final class ResourceSecurityTest extends TestCase
             $table->timestamps();
         });
 
+        Schema::create('resource_categories', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+        });
+
         $schoolId = \DB::table('schools')->insertGetId([
             'school_name' => 'Escola Teste',
             'school_code' => 'ETI001',
@@ -86,15 +75,20 @@ final class ResourceSecurityTest extends TestCase
             'updated_at' => now(),
         ]);
 
+        \DB::table('resource_categories')->insert([
+            'id' => 1,
+            'name' => 'Audiovisual',
+        ]);
+
         $response = $this->postJson('/resources-admin', [
             'school_id' => $schoolId,
-            'resource_name' => 'Projetor',
-            'category' => 'equipment',
+            'user_id' => 1,
+            'name' => 'Projetor',
+            'category_id' => 1,
         ], [
             'Authorization' => 'Bearer user-token',
         ]);
 
-        // Usuário regular não pode criar recursos
-        $this->assertTrue(in_array($response->status(), [401, 403]));
+        $response->assertStatus(403);
     }
 }

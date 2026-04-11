@@ -15,8 +15,12 @@ final class CreateBookingTest extends TestCase
     {
         parent::setUp();
 
+        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('booking_lessons');
         Schema::dropIfExists('bookings');
         Schema::dropIfExists('lesson_slots');
+        Schema::dropIfExists('subjects');
+        Schema::dropIfExists('class_groups');
         Schema::dropIfExists('resources');
         Schema::dropIfExists('users');
         Schema::dropIfExists('schools');
@@ -45,24 +49,36 @@ final class CreateBookingTest extends TestCase
         Schema::create('resources', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('school_id');
-            $table->string('resource_code')->unique();
-            $table->string('resource_name');
-            $table->string('category', 20);
-            $table->smallInteger('status')->default(1);
+            $table->unsignedBigInteger('category_id')->nullable();
+            $table->string('name');
+            $table->smallInteger('active')->default(1);
+            $table->timestamps();
+        });
+
+        Schema::create('class_groups', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('school_id');
+            $table->string('name');
+            $table->smallInteger('active')->default(1);
+            $table->timestamps();
+        });
+
+        Schema::create('subjects', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('school_id');
+            $table->string('name');
+            $table->smallInteger('active')->default(1);
             $table->timestamps();
         });
 
         Schema::create('lesson_slots', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('school_id');
-            $table->string('lesson_slot_code')->unique();
-            $table->date('date');
-            $table->time('start_time');
-            $table->time('end_time');
-            $table->string('class_group_name');
-            $table->string('teacher_name');
-            $table->string('subject_name');
-            $table->smallInteger('status')->default(1);
+            $table->integer('lesson_number');
+            $table->string('label');
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
+            $table->smallInteger('active')->default(1);
             $table->timestamps();
         });
 
@@ -71,10 +87,37 @@ final class CreateBookingTest extends TestCase
             $table->unsignedBigInteger('school_id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('resource_id');
-            $table->unsignedBigInteger('lesson_slot_id');
-            $table->string('status', 20)->default('pending');
-            $table->text('reason')->nullable();
+            $table->unsignedBigInteger('class_group_id');
+            $table->unsignedBigInteger('subject_id');
+            $table->date('booking_date');
+            $table->string('status', 20)->default('scheduled');
+            $table->text('purpose')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
+            $table->unsignedBigInteger('completed_by_user_id')->nullable();
+            $table->text('completion_feedback')->nullable();
+            $table->string('idempotency_key')->nullable();
             $table->timestamps();
+        });
+
+        Schema::create('booking_lessons', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('booking_id');
+            $table->unsignedBigInteger('lesson_slot_id');
+        });
+
+        Schema::create('notifications', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('school_id');
+            $table->unsignedBigInteger('user_id');
+            $table->string('type')->nullable();
+            $table->string('title')->nullable();
+            $table->text('message')->nullable();
+            $table->unsignedBigInteger('booking_id')->nullable();
+            $table->text('metadata_json')->nullable();
+            $table->timestamp('read_at')->nullable();
+            $table->timestamp('created_at')->nullable();
+            $table->timestamp('updated_at')->nullable();
         });
     }
 
@@ -83,7 +126,11 @@ final class CreateBookingTest extends TestCase
         $response = $this->postJson('/bookings', [
             'school_id' => 1,
             'resource_id' => 1,
-            'lesson_slot_id' => 1,
+            'user_id' => 1,
+            'class_group_id' => 1,
+            'subject_id' => 1,
+            'booking_date' => '2026-04-11',
+            'lesson_ids' => [1],
         ]);
 
         $response->assertStatus(401);
@@ -115,7 +162,11 @@ final class CreateBookingTest extends TestCase
         $response = $this->postJson('/bookings', [
             'school_id' => $schoolId,
             'resource_id' => null,
-            'lesson_slot_id' => null,
+            'user_id' => 1,
+            'class_group_id' => null,
+            'subject_id' => null,
+            'booking_date' => '',
+            'lesson_ids' => [],
         ], [
             'Authorization' => 'Bearer valid-token',
         ]);
@@ -148,14 +199,58 @@ final class CreateBookingTest extends TestCase
             'updated_at' => now(),
         ]);
 
+        \DB::table('resources')->insert([
+            'id' => 1,
+            'school_id' => $schoolId,
+            'category_id' => 1,
+            'name' => 'Laboratorio 01',
+            'active' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \DB::table('class_groups')->insert([
+            'id' => 1,
+            'school_id' => $schoolId,
+            'name' => '1 Ano A',
+            'active' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \DB::table('subjects')->insert([
+            'id' => 1,
+            'school_id' => $schoolId,
+            'name' => 'Ciencias',
+            'active' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \DB::table('lesson_slots')->insert([
+            'id' => 1,
+            'school_id' => $schoolId,
+            'lesson_number' => 1,
+            'label' => '1a Aula',
+            'start_time' => '08:00:00',
+            'end_time' => '08:50:00',
+            'active' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $response = $this->postJson('/bookings', [
             'school_id' => $schoolId + 999,
             'resource_id' => 1,
-            'lesson_slot_id' => 1,
+            'user_id' => 1,
+            'class_group_id' => 1,
+            'subject_id' => 1,
+            'booking_date' => '2026-04-11',
+            'lesson_ids' => [1],
         ], [
             'Authorization' => 'Bearer valid-token',
         ]);
 
-        $response->assertStatus(401);
+        $response->assertStatus(403);
     }
 }

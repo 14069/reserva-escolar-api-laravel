@@ -86,7 +86,17 @@ php artisan route:list
 php artisan serve
 ```
 
+## Deploy
+
+Para deploy real no Railway:
+
+- use [.env.railway.example](/home/agacy-junior/RESERVA_ESCOLAR/reserva_escolar_api_laravel/.env.railway.example) como base
+- veja o passo a passo em [DEPLOY_RAILWAY.md](/home/agacy-junior/RESERVA_ESCOLAR/reserva_escolar_api_laravel/DEPLOY_RAILWAY.md)
+- o repositório agora inclui [Dockerfile](/home/agacy-junior/RESERVA_ESCOLAR/reserva_escolar_api_laravel/Dockerfile) para build do serviço
+- em produção, o CORS agora exige `RESERVA_ALLOWED_ORIGINS` explícito; se a variável não vier, a API falha fechada nesse ponto
+
 ## Observações
 
 - O projeto continua em migração incremental, mas agora a superfície de rotas já está preparada para substituição gradual.
 - A próxima etapa recomendada é migrar o Flutter dos aliases `.php` para as rotas canônicas aos poucos, começando por auth e health e depois seguindo por bookings e admin.
+- O schema real da aplicação ainda não foi migrado integralmente para migrations Laravel; hoje a troca mais segura é apontar o Laravel para o banco já usado pela API atual.

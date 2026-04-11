@@ -1,5 +1,8 @@
 <?php
 
+$appEnv = strtolower((string) env('APP_ENV', 'production'));
+$isProductionLike = in_array($appEnv, ['production', 'prod'], true);
+
 $defaultAllowedOrigins = [
     'http://localhost',
     'http://127.0.0.1',
@@ -21,7 +24,8 @@ $configuredOrigins = array_values(array_filter(array_map(
 return [
     'paths' => ['*'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => $configuredOrigins !== [] ? $configuredOrigins : $defaultAllowedOrigins,
+    // In production, fail closed if explicit origins were not configured.
+    'allowed_origins' => $configuredOrigins !== [] ? $configuredOrigins : ($isProductionLike ? [] : $defaultAllowedOrigins),
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     'exposed_headers' => [],

@@ -1,0 +1,17 @@
+.git
+.github
+.idea
+.vscode
+node_modules
+vendor
+storage/logs
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/framework/views/*
+.env
+.env.*
+tests
+.phpunit.cache
+.phpunit.result.cache
+coverage.xml
