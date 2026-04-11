@@ -82,6 +82,8 @@ Passos:
 4. Adicionar o domínio `api.reservaescolar.com.br`.
 5. Fazer o primeiro deploy.
 
+Se o log de build mostrar `composer install --optimize-autoloader --no-scripts --no-interaction` sem `--no-dev`, o Railway provavelmente nao esta usando o [Dockerfile](/home/agacy-junior/RESERVA_ESCOLAR/reserva_escolar_api_laravel/Dockerfile) deste repositório. Nesse caso, ajuste o serviço para buildar pelo Dockerfile antes de validar o deploy.
+
 ## 6. Validacao apos deploy
 
 Executar pelo menos:
