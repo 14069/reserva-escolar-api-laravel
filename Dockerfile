@@ -18,6 +18,7 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install \
     --no-dev \
+    --no-scripts \
     --no-interaction \
     --no-progress \
     --prefer-dist \
@@ -25,14 +26,15 @@ RUN composer install \
 
 COPY . .
 
-RUN composer dump-autoload --no-dev --optimize \
-    && mkdir -p \
+RUN mkdir -p \
         bootstrap/cache \
         storage/framework/cache \
         storage/framework/sessions \
         storage/framework/testing \
         storage/framework/views \
-        storage/logs
+        storage/logs \
+    && composer dump-autoload --no-dev --optimize \
+    && php artisan package:discover --ansi
 
 ENV APP_ENV=production
 ENV PORT=8080
