@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Services\Auth\ApiTokenAuthService;
 use App\Services\Auth\LoginService;
 use App\Support\ApiResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -38,7 +39,7 @@ final class AuthController
                 'api_token_expires_at' => null,
             ]);
         } catch (\Exception $e) {
-            \Log::error('Logout error - failed to clear token', ['error' => $e->getMessage()]);
+            Log::error('Logout error - failed to clear token', ['error' => $e->getMessage()]);
 
             return ApiResponse::error('Falha ao fazer logout', 500);
         }
