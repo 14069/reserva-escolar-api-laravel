@@ -16,8 +16,7 @@ final class BookingStatusService
     public function __construct(
         private readonly BookingDatabaseSupport $databaseSupport,
         private readonly BookingNotificationService $notificationService,
-    ) {
-    }
+    ) {}
 
     public function cancel(array $payload, User $authUser): void
     {

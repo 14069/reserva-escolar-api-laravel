@@ -15,8 +15,7 @@ final class AccountController
     public function __construct(
         private readonly AccountService $accountService,
         private readonly ApiTokenAuthService $authService,
-    ) {
-    }
+    ) {}
 
     public function changePassword(ChangePasswordRequest $request): JsonResponse
     {

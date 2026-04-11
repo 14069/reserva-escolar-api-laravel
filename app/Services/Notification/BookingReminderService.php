@@ -53,7 +53,7 @@ final class BookingReminderService
                 $isOverdue = true;
             }
 
-            if (!$isOverdue) {
+            if (! $isOverdue) {
                 continue;
             }
 
@@ -74,7 +74,7 @@ final class BookingReminderService
                 'user_id' => $userId,
                 'type' => 'booking_reminder_complete',
                 'title' => 'Finalize seu agendamento',
-                'message' => 'O período reservado de ' . $resourceName . ' já terminou. Finalize o agendamento para liberar o recurso.',
+                'message' => 'O período reservado de '.$resourceName.' já terminou. Finalize o agendamento para liberar o recurso.',
                 'booking_id' => $bookingId,
                 'metadata_json' => json_encode([
                     'resource_name' => $resourceName,

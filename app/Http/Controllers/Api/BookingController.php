@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Booking\ListBookingsRequest;
-use App\Http\Requests\Booking\ListMyBookingsRequest;
 use App\Http\Requests\Booking\CancelBookingRequest;
 use App\Http\Requests\Booking\CompleteBookingRequest;
+use App\Http\Requests\Booking\ListBookingsRequest;
+use App\Http\Requests\Booking\ListMyBookingsRequest;
 use App\Http\Requests\Booking\StoreBookingRequest;
 use App\Services\Auth\ApiTokenAuthService;
-use App\Services\Booking\CreateBookingService;
-use App\Services\Booking\BookingStatusService;
-use App\Services\Booking\BookingQueryService;
 use App\Services\Booking\BookingDatabaseSupport;
+use App\Services\Booking\BookingQueryService;
+use App\Services\Booking\BookingStatusService;
+use App\Services\Booking\CreateBookingService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
@@ -25,8 +25,7 @@ final class BookingController
         private readonly CreateBookingService $createBookingService,
         private readonly BookingStatusService $bookingStatusService,
         private readonly BookingDatabaseSupport $databaseSupport,
-    ) {
-    }
+    ) {}
 
     public function index(ListBookingsRequest $request): JsonResponse
     {

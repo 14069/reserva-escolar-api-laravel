@@ -8,7 +8,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class ClassGroupMutationRequest extends FormRequest
 {
-    public function authorize(): bool { return true; }
+    public function authorize(): bool
+    {
+        return true;
+    }
+
     public function rules(): array
     {
         return [
@@ -18,6 +22,7 @@ final class ClassGroupMutationRequest extends FormRequest
             'name' => ['required', 'string', 'max:20'],
         ];
     }
+
     protected function prepareForValidation(): void
     {
         $this->merge(['name' => trim((string) $this->input('name', ''))]);

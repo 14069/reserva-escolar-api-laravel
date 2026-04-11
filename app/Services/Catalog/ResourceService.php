@@ -79,21 +79,21 @@ final class ResourceService
 
     private function assertActiveTechnician(int $userId, int $schoolId, string $message): void
     {
-        if (!DB::table('users')->where('id', $userId)->where('school_id', $schoolId)->where('role', 'technician')->where('active', 1)->exists()) {
+        if (! DB::table('users')->where('id', $userId)->where('school_id', $schoolId)->where('role', 'technician')->where('active', 1)->exists()) {
             throw new HttpResponseException(ApiResponse::error($message, 403, 'RESOURCE_ACTION_FORBIDDEN'));
         }
     }
 
     private function assertCategoryExists(int $categoryId): void
     {
-        if (!DB::table('resource_categories')->where('id', $categoryId)->exists()) {
+        if (! DB::table('resource_categories')->where('id', $categoryId)->exists()) {
             throw new HttpResponseException(ApiResponse::error('Categoria inválida.', 404, 'RESOURCE_CATEGORY_NOT_FOUND'));
         }
     }
 
     private function assertResourceExists(int $resourceId, int $schoolId): void
     {
-        if (!DB::table('resources')->where('id', $resourceId)->where('school_id', $schoolId)->exists()) {
+        if (! DB::table('resources')->where('id', $resourceId)->where('school_id', $schoolId)->exists()) {
             throw new HttpResponseException(ApiResponse::error('Recurso não encontrado.', 404, 'RESOURCE_NOT_FOUND'));
         }
     }

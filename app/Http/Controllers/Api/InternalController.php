@@ -17,8 +17,7 @@ final class InternalController
         private readonly InternalAccessService $internalAccessService,
         private readonly DiagnosticService $diagnosticService,
         private readonly BookingReminderService $bookingReminderService,
-    ) {
-    }
+    ) {}
 
     public function checkDatabaseConnection(Request $request): JsonResponse
     {
@@ -30,6 +29,7 @@ final class InternalController
             \Log::info('Internal: database connection check completed', ['result' => $result]);
         } catch (\Exception $e) {
             \Log::error('Internal: database connection check failed', ['error' => $e->getMessage()]);
+
             return ApiResponse::error('Falha ao verificar conexão com banco', 500);
         }
 
@@ -46,6 +46,7 @@ final class InternalController
             \Log::info('Internal: booking completion reminders completed', ['result' => $result]);
         } catch (\Exception $e) {
             \Log::error('Internal: booking completion reminders failed', ['error' => $e->getMessage()]);
+
             return ApiResponse::error('Falha ao processar lembretes', 500);
         }
 

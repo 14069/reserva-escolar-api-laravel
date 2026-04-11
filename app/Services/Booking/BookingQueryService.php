@@ -24,36 +24,36 @@ final class BookingQueryService
             ->join('subjects as s', 's.id', '=', 'b.subject_id')
             ->where('b.school_id', (int) $filters['school_id']);
 
-        if (!empty($filters['booking_date'])) {
+        if (! empty($filters['booking_date'])) {
             $query->whereDate('b.booking_date', $filters['booking_date']);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->whereDate('b.booking_date', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->whereDate('b.booking_date', '<=', $filters['date_to']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('b.status', $filters['status']);
         }
 
-        if (!empty($filters['teacher'])) {
+        if (! empty($filters['teacher'])) {
             $query->where('u.name', $filters['teacher']);
         }
 
-        if (!empty($filters['resource'])) {
+        if (! empty($filters['resource'])) {
             $query->where('r.name', $filters['resource']);
         }
 
-        if (!empty($filters['class_group'])) {
+        if (! empty($filters['class_group'])) {
             $query->where('cg.name', $filters['class_group']);
         }
 
-        if (!empty($filters['search'])) {
-            $search = '%' . $filters['search'] . '%';
+        if (! empty($filters['search'])) {
+            $search = '%'.$filters['search'].'%';
             $query->where(function ($subQuery) use ($search): void {
                 $subQuery
                     ->where('r.name', 'like', $search)
@@ -200,12 +200,12 @@ final class BookingQueryService
             ->where('b.school_id', (int) $filters['school_id'])
             ->where('b.user_id', $userId);
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('b.status', $filters['status']);
         }
 
-        if (!empty($filters['search'])) {
-            $search = '%' . $filters['search'] . '%';
+        if (! empty($filters['search'])) {
+            $search = '%'.$filters['search'].'%';
             $query->where(function ($subQuery) use ($search): void {
                 $subQuery
                     ->where('r.name', 'like', $search)
@@ -291,6 +291,7 @@ final class BookingQueryService
 
             $bookings = $bookings->map(function (array $booking) use ($lessonsByBookingId): array {
                 $booking['lessons'] = $lessonsByBookingId->get($booking['id'], []);
+
                 return $booking;
             })->values();
         }

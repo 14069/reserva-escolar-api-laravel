@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Auth;
 
 use App\Models\User;
+use App\Support\ApiResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use App\Support\ApiResponse;
 
 final class ApiTokenAuthService
 {
@@ -85,7 +85,7 @@ final class ApiTokenAuthService
             return null;
         }
 
-        if (!preg_match('/^Bearer\s+(.+)$/i', $header, $matches)) {
+        if (! preg_match('/^Bearer\s+(.+)$/i', $header, $matches)) {
             return null;
         }
 

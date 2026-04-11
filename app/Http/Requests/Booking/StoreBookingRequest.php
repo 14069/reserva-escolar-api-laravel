@@ -32,7 +32,7 @@ final class StoreBookingRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $lessonIds = $this->input('lesson_ids', []);
-        if (!is_array($lessonIds)) {
+        if (! is_array($lessonIds)) {
             $lessonIds = [];
         }
 

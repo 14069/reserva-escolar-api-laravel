@@ -35,7 +35,7 @@ final class AccountService
             );
         }
 
-        if (!Hash::check($payload['current_password'], $user->password)) {
+        if (! Hash::check($payload['current_password'], $user->password)) {
             throw new HttpResponseException(
                 ApiResponse::error('A senha atual informada não confere.', 401, 'ACCOUNT_CURRENT_PASSWORD_INVALID')
             );

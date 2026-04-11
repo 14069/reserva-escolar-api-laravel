@@ -32,12 +32,12 @@ final class LookupQueryService
             $query->where('r.active', '<>', 1);
         }
 
-        if (!empty($filters['category'])) {
+        if (! empty($filters['category'])) {
             $query->where('rc.name', $filters['category']);
         }
 
-        if (!empty($filters['search'])) {
-            $search = '%' . $filters['search'] . '%';
+        if (! empty($filters['search'])) {
+            $search = '%'.$filters['search'].'%';
             $query->where(function ($subQuery) use ($search): void {
                 $subQuery
                     ->where('r.name', 'like', $search)

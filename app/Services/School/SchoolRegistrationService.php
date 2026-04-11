@@ -105,7 +105,7 @@ final class SchoolRegistrationService
                     $lessonRows[] = [
                         'school_id' => $schoolId,
                         'lesson_number' => $i,
-                        'label' => $i . 'ª aula',
+                        'label' => $i.'ª aula',
                         'active' => 1,
                     ];
                 }

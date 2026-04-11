@@ -96,11 +96,6 @@ jobs:
       - name: Run migrations
         run: php artisan migrate --force
 
-      - name: Seed test data
-        run: |
-          php artisan db:seed --force
-          echo "Test data seeded"
-
       - name: Lint PHP files
         run: |
           while IFS= read -r file; do

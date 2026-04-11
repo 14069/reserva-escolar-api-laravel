@@ -16,8 +16,7 @@ final class AuthController
     public function __construct(
         private readonly LoginService $loginService,
         private readonly ApiTokenAuthService $authService,
-    ) {
-    }
+    ) {}
 
     public function login(LoginRequest $request): JsonResponse
     {
@@ -40,6 +39,7 @@ final class AuthController
             ]);
         } catch (\Exception $e) {
             \Log::error('Logout error - failed to clear token', ['error' => $e->getMessage()]);
+
             return ApiResponse::error('Falha ao fazer logout', 500);
         }
 

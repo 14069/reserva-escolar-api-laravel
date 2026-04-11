@@ -9,7 +9,11 @@ use Illuminate\Validation\Rule;
 
 final class LessonSlotsAdminIndexRequest extends FormRequest
 {
-    public function authorize(): bool { return true; }
+    public function authorize(): bool
+    {
+        return true;
+    }
+
     public function rules(): array
     {
         return [
@@ -21,6 +25,7 @@ final class LessonSlotsAdminIndexRequest extends FormRequest
             'page_size' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
+
     protected function prepareForValidation(): void
     {
         $this->merge([

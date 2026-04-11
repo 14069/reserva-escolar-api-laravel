@@ -64,7 +64,7 @@ final class AuthorizationTest extends TestCase
         ]);
 
         // Tentar acessar rota admin (admin/teachers)
-        $response = $this->getJson('/admin/teachers?school_id=' . $schoolId, [
+        $response = $this->getJson('/admin/teachers?school_id='.$schoolId, [
             'Authorization' => 'Bearer user-token',
         ]);
 
@@ -96,7 +96,7 @@ final class AuthorizationTest extends TestCase
         ]);
 
         // Tentar acessar rota admin (admin/teachers) - deve ser permitido
-        $response = $this->getJson('/admin/teachers?school_id=' . $schoolId, [
+        $response = $this->getJson('/admin/teachers?school_id='.$schoolId, [
             'Authorization' => 'Bearer tech-token',
         ]);
 
@@ -136,7 +136,7 @@ final class AuthorizationTest extends TestCase
         ]);
 
         // Tentar acessar com school_id diferente
-        $response = $this->getJson('/notifications?school_id=' . $school2Id . '&page=1', [
+        $response = $this->getJson('/notifications?school_id='.$school2Id.'&page=1', [
             'Authorization' => 'Bearer user-token',
         ]);
 
@@ -154,7 +154,7 @@ final class AuthorizationTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        $response = $this->getJson('/notifications?school_id=' . $schoolId . '&page=1', [
+        $response = $this->getJson('/notifications?school_id='.$schoolId.'&page=1', [
             'Authorization' => 'Bearer invalid-token-12345',
         ]);
 
@@ -184,7 +184,7 @@ final class AuthorizationTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        $response = $this->getJson('/notifications?school_id=' . $schoolId . '&page=1', [
+        $response = $this->getJson('/notifications?school_id='.$schoolId.'&page=1', [
             'Authorization' => 'Bearer expired-token',
         ]);
 
