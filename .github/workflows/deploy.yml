@@ -1,9 +1,10 @@
-name: Laravel API Deploy
+name: Laravel API CI
 
 on:
   push:
     branches:
       - main
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -15,10 +16,11 @@ jobs:
       postgres:
         image: postgres:16
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: reserva_test
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -49,15 +51,16 @@ jobs:
       - name: Install composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
-      - name: Copy .env file
+      - name: Prepare environment
         run: |
           cp .env.example .env
           php artisan key:generate
 
       - name: Run migrations
         env:
+          APP_ENV: testing
           DB_CONNECTION: pgsql
-          DB_HOST: localhost
+          DB_HOST: 127.0.0.1
           DB_PORT: 5432
           DB_DATABASE: reserva_test
           DB_USERNAME: postgres
@@ -66,46 +69,11 @@ jobs:
 
       - name: Run tests
         env:
+          APP_ENV: testing
           DB_CONNECTION: pgsql
-          DB_HOST: localhost
+          DB_HOST: 127.0.0.1
           DB_PORT: 5432
           DB_DATABASE: reserva_test
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
         run: php artisan test
-
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Deploy to Railway
-        uses: devtin/railway-action@v1.1.4
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        with:
-          serviceId: ${{ secrets.RAILWAY_SERVICE_ID }}
-          projectId: ${{ secrets.RAILWAY_PROJECT_ID }}
-
-      - name: Verify deployment
-        run: |
-          echo "Deploy iniciado!"
-          echo "Verifique o status em: https://railway.app"
-        if: success()
-
-      - name: Notify Slack (optional)
-        uses: 8398a7/action-slack@v3
-        if: always()
-        with:
-          status: ${{ job.status }}
-          text: 'API Laravel Deploy: ${{ job.status }}'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-          fields: repo,message,commit,author
-        continue-on-error: true
