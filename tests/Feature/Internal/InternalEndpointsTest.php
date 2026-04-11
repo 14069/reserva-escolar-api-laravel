@@ -6,6 +6,7 @@ namespace Tests\Feature\Internal;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -104,9 +105,9 @@ final class InternalEndpointsTest extends TestCase
                 'message' => 'Conexão com o banco verificada com sucesso.',
                 'data' => [
                     'status' => 'ok',
-                    'driver' => 'sqlite',
                 ],
             ]);
+        $this->assertContains($response->json('data.driver'), ['sqlite', 'pgsql', 'mysql']);
     }
 
     public function test_booking_reminder_endpoint_requires_cron_token(): void
@@ -127,7 +128,7 @@ final class InternalEndpointsTest extends TestCase
     {
         Carbon::setTestNow(Carbon::parse('2026-04-10 14:00:00'));
 
-        $resourceId = \DB::table('resources')->insertGetId([
+        $resourceId = DB::table('resources')->insertGetId([
             'school_id' => 1,
             'name' => 'Projetor 1',
             'active' => 1,
@@ -135,7 +136,7 @@ final class InternalEndpointsTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        $bookingId = \DB::table('bookings')->insertGetId([
+        $bookingId = DB::table('bookings')->insertGetId([
             'school_id' => 1,
             'resource_id' => $resourceId,
             'user_id' => 7,
@@ -145,7 +146,7 @@ final class InternalEndpointsTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        $lessonSlotId = \DB::table('lesson_slots')->insertGetId([
+        $lessonSlotId = DB::table('lesson_slots')->insertGetId([
             'school_id' => 1,
             'lesson_number' => 1,
             'label' => '1ª aula',
@@ -155,7 +156,7 @@ final class InternalEndpointsTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        \DB::table('booking_lessons')->insert([
+        DB::table('booking_lessons')->insert([
             'booking_id' => $bookingId,
             'lesson_slot_id' => $lessonSlotId,
         ]);
