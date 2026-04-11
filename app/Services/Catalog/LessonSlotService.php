@@ -25,8 +25,8 @@ final class LessonSlotService
             $query->where('active', '<>', 1);
         }
 
-        if (!empty($filters['search'])) {
-            $search = '%' . $filters['search'] . '%';
+        if (! empty($filters['search'])) {
+            $search = '%'.$filters['search'].'%';
             $query->where(function ($sub) use ($search): void {
                 $sub->where('label', 'like', $search)
                     ->orWhereRaw('CAST(lesson_number AS TEXT) LIKE ?', [$search])
@@ -141,14 +141,14 @@ final class LessonSlotService
 
     private function assertActiveTechnician(int $userId, int $schoolId, string $message): void
     {
-        if (!DB::table('users')->where('id', $userId)->where('school_id', $schoolId)->where('role', 'technician')->where('active', 1)->exists()) {
+        if (! DB::table('users')->where('id', $userId)->where('school_id', $schoolId)->where('role', 'technician')->where('active', 1)->exists()) {
             throw new HttpResponseException(ApiResponse::error($message, 403, 'LESSON_SLOT_ACTION_FORBIDDEN'));
         }
     }
 
     private function assertExists(int $lessonSlotId, int $schoolId): void
     {
-        if (!DB::table('lesson_slots')->where('id', $lessonSlotId)->where('school_id', $schoolId)->exists()) {
+        if (! DB::table('lesson_slots')->where('id', $lessonSlotId)->where('school_id', $schoolId)->exists()) {
             throw new HttpResponseException(ApiResponse::error('Aula não encontrada.', 404, 'LESSON_SLOT_NOT_FOUND'));
         }
     }

@@ -8,7 +8,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class ResourceMutationRequest extends FormRequest
 {
-    public function authorize(): bool { return true; }
+    public function authorize(): bool
+    {
+        return true;
+    }
+
     public function rules(): array
     {
         return [
@@ -19,6 +23,7 @@ final class ResourceMutationRequest extends FormRequest
             'name' => ['required', 'string', 'max:150'],
         ];
     }
+
     protected function prepareForValidation(): void
     {
         $this->merge(['name' => trim((string) $this->input('name', ''))]);

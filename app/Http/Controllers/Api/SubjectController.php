@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\Catalog\SubjectMutationRequest;
-use App\Http\Requests\Catalog\SubjectStatusToggleRequest;
 use App\Http\Requests\Catalog\SubjectsAdminIndexRequest;
+use App\Http\Requests\Catalog\SubjectStatusToggleRequest;
 use App\Services\Auth\ApiTokenAuthService;
 use App\Services\Catalog\SubjectService;
 use App\Support\ApiResponse;
@@ -17,8 +17,7 @@ final class SubjectController
     public function __construct(
         private readonly SubjectService $subjectService,
         private readonly ApiTokenAuthService $authService,
-    ) {
-    }
+    ) {}
 
     public function index(SubjectsAdminIndexRequest $request): JsonResponse
     {

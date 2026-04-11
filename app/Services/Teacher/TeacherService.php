@@ -27,8 +27,8 @@ final class TeacherService
             $query->where('active', '<>', 1);
         }
 
-        if (!empty($filters['search'])) {
-            $search = '%' . $filters['search'] . '%';
+        if (! empty($filters['search'])) {
+            $search = '%'.$filters['search'].'%';
             $query->where(function ($subQuery) use ($search): void {
                 $subQuery
                     ->where('name', 'like', $search)
@@ -208,7 +208,7 @@ final class TeacherService
             ->where('active', 1)
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             throw new HttpResponseException(ApiResponse::error($message, 403, 'TEACHER_ACTION_FORBIDDEN'));
         }
     }
@@ -221,7 +221,7 @@ final class TeacherService
             ->where('role', 'teacher')
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             throw new HttpResponseException(
                 ApiResponse::error('Professor não encontrado.', 404, 'TEACHER_NOT_FOUND')
             );

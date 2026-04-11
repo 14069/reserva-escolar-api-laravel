@@ -8,7 +8,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class LessonSlotStatusToggleRequest extends FormRequest
 {
-    public function authorize(): bool { return true; }
+    public function authorize(): bool
+    {
+        return true;
+    }
+
     public function rules(): array
     {
         return [

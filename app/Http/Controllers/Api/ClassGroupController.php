@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\Catalog\ClassGroupMutationRequest;
-use App\Http\Requests\Catalog\ClassGroupStatusToggleRequest;
 use App\Http\Requests\Catalog\ClassGroupsAdminIndexRequest;
+use App\Http\Requests\Catalog\ClassGroupStatusToggleRequest;
 use App\Services\Auth\ApiTokenAuthService;
 use App\Services\Catalog\ClassGroupService;
 use App\Support\ApiResponse;
@@ -17,8 +17,7 @@ final class ClassGroupController
     public function __construct(
         private readonly ClassGroupService $classGroupService,
         private readonly ApiTokenAuthService $authService,
-    ) {
-    }
+    ) {}
 
     public function index(ClassGroupsAdminIndexRequest $request): JsonResponse
     {

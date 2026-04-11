@@ -18,8 +18,7 @@ final class NotificationController
     public function __construct(
         private readonly NotificationService $notificationService,
         private readonly ApiTokenAuthService $authService,
-    ) {
-    }
+    ) {}
 
     public function index(ListNotificationsRequest $request): JsonResponse
     {

@@ -8,7 +8,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class LessonSlotMutationRequest extends FormRequest
 {
-    public function authorize(): bool { return true; }
+    public function authorize(): bool
+    {
+        return true;
+    }
+
     public function rules(): array
     {
         return [
@@ -21,6 +25,7 @@ final class LessonSlotMutationRequest extends FormRequest
             'end_time' => ['nullable', 'date_format:H:i:s'],
         ];
     }
+
     protected function prepareForValidation(): void
     {
         $start = trim((string) $this->input('start_time', ''));

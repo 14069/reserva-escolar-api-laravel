@@ -11,8 +11,11 @@ use Illuminate\Support\Facades\DB;
 abstract class SimpleNamedCatalogService
 {
     abstract protected function table(): string;
+
     abstract protected function idField(): string;
+
     abstract protected function entityLabel(): string;
+
     abstract protected function nameFieldMax(): int;
 
     public function list(array $filters): array
@@ -30,8 +33,8 @@ abstract class SimpleNamedCatalogService
             $query->where('active', '<>', 1);
         }
 
-        if (!empty($filters['search'])) {
-            $query->where('name', 'like', '%' . $filters['search'] . '%');
+        if (! empty($filters['search'])) {
+            $query->where('name', 'like', '%'.$filters['search'].'%');
         }
 
         $summary = (clone $query)
@@ -79,7 +82,7 @@ abstract class SimpleNamedCatalogService
     public function create(array $payload, int $authUserId): array
     {
         $schoolId = (int) $payload['school_id'];
-        $this->assertActiveTechnician($authUserId, $schoolId, 'Usuário sem permissão para cadastrar ' . mb_strtolower($this->entityLabel()) . 's.');
+        $this->assertActiveTechnician($authUserId, $schoolId, 'Usuário sem permissão para cadastrar '.mb_strtolower($this->entityLabel()).'s.');
         $name = (string) $payload['name'];
 
         if (DB::table($this->table())->where('school_id', $schoolId)->where('name', $name)->exists()) {
@@ -106,13 +109,13 @@ abstract class SimpleNamedCatalogService
         $schoolId = (int) $payload['school_id'];
         $id = (int) $payload[$this->idField()];
         $name = (string) $payload['name'];
-        $this->assertActiveTechnician($authUserId, $schoolId, 'Usuário sem permissão para editar ' . mb_strtolower($this->entityLabel()) . 's.');
+        $this->assertActiveTechnician($authUserId, $schoolId, 'Usuário sem permissão para editar '.mb_strtolower($this->entityLabel()).'s.');
         $this->assertExists($id, $schoolId);
 
         if (DB::table($this->table())->where('school_id', $schoolId)->where('name', $name)->where('id', '<>', $id)->exists()) {
             throw new HttpResponseException(
                 ApiResponse::error(
-                    'Já existe outra ' . mb_strtolower($this->entityLabel()) . ' com esse nome nesta escola.',
+                    'Já existe outra '.mb_strtolower($this->entityLabel()).' com esse nome nesta escola.',
                     409,
                     'CATALOG_NAME_CONFLICT'
                 )
@@ -126,17 +129,17 @@ abstract class SimpleNamedCatalogService
     {
         $schoolId = (int) $payload['school_id'];
         $id = (int) $payload[$this->idField()];
-        $this->assertActiveTechnician($authUserId, $schoolId, 'Usuário sem permissão para alterar status de ' . mb_strtolower($this->entityLabel()) . 's.');
+        $this->assertActiveTechnician($authUserId, $schoolId, 'Usuário sem permissão para alterar status de '.mb_strtolower($this->entityLabel()).'s.');
 
         $row = DB::table($this->table())->where('id', $id)->where('school_id', $schoolId)->first(['id', 'active']);
         if ($row === null) {
-            throw new HttpResponseException(ApiResponse::error($this->entityLabel() . ' não encontrada.', 404, 'CATALOG_NOT_FOUND'));
+            throw new HttpResponseException(ApiResponse::error($this->entityLabel().' não encontrada.', 404, 'CATALOG_NOT_FOUND'));
         }
 
         $newStatus = ((int) $row->active === 1) ? 0 : 1;
         DB::table($this->table())->where('id', $id)->where('school_id', $schoolId)->update(['active' => $newStatus]);
 
-        return $this->entityLabel() . ($newStatus === 1 ? ' ativada com sucesso.' : ' desativada com sucesso.');
+        return $this->entityLabel().($newStatus === 1 ? ' ativada com sucesso.' : ' desativada com sucesso.');
     }
 
     protected function assertActiveTechnician(int $userId, int $schoolId, string $message): void
@@ -148,15 +151,15 @@ abstract class SimpleNamedCatalogService
             ->where('active', 1)
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             throw new HttpResponseException(ApiResponse::error($message, 403, 'CATALOG_ACTION_FORBIDDEN'));
         }
     }
 
     protected function assertExists(int $id, int $schoolId): void
     {
-        if (!DB::table($this->table())->where('id', $id)->where('school_id', $schoolId)->exists()) {
-            throw new HttpResponseException(ApiResponse::error($this->entityLabel() . ' não encontrada.', 404, 'CATALOG_NOT_FOUND'));
+        if (! DB::table($this->table())->where('id', $id)->where('school_id', $schoolId)->exists()) {
+            throw new HttpResponseException(ApiResponse::error($this->entityLabel().' não encontrada.', 404, 'CATALOG_NOT_FOUND'));
         }
     }
 
@@ -164,6 +167,6 @@ abstract class SimpleNamedCatalogService
     {
         $label = mb_strtolower($this->entityLabel());
 
-        return 'Já existe ' . ($label === 'turma' ? 'uma' : 'uma') . ' ' . $label . ' com esse nome nesta escola.';
+        return 'Já existe '.($label === 'turma' ? 'uma' : 'uma').' '.$label.' com esse nome nesta escola.';
     }
 }

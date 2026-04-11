@@ -81,7 +81,7 @@ final class NotificationTest extends TestCase
             ['school_id' => $schoolId, 'user_id' => $userId, 'title' => 'Not 3', 'message' => 'Message 3', 'read_at' => now(), 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        $response = $this->getJson('/notifications/unread-count?school_id=' . $schoolId, [
+        $response = $this->getJson('/notifications/unread-count?school_id='.$schoolId, [
             'Authorization' => 'Bearer user-token',
         ]);
 
@@ -123,7 +123,7 @@ final class NotificationTest extends TestCase
             ['school_id' => $schoolId, 'user_id' => $userId, 'title' => 'Not 2', 'message' => 'Message 2', 'read_at' => null, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        $response = $this->postJson('/notifications/read-all?school_id=' . $schoolId, [], [
+        $response = $this->postJson('/notifications/read-all?school_id='.$schoolId, [], [
             'Authorization' => 'Bearer user-token',
         ]);
 

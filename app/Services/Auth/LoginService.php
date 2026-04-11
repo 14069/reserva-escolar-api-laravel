@@ -7,15 +7,13 @@ namespace App\Services\Auth;
 use App\Models\User;
 use App\Support\ApiResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 final class LoginService
 {
     public function __construct(
         private readonly ApiTokenAuthService $tokenAuthService,
-    ) {
-    }
+    ) {}
 
     public function login(array $credentials): array
     {
@@ -37,7 +35,7 @@ final class LoginService
             ->where('users.active', 1)
             ->first();
 
-        if ($user === null || !Hash::check($credentials['password'], $user->password)) {
+        if ($user === null || ! Hash::check($credentials['password'], $user->password)) {
             throw new HttpResponseException(
                 ApiResponse::error('Credenciais inválidas.', 401, 'LOGIN_INVALID_CREDENTIALS')
             );

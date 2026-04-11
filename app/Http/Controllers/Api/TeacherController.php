@@ -19,8 +19,7 @@ final class TeacherController
     public function __construct(
         private readonly TeacherService $teacherService,
         private readonly ApiTokenAuthService $authService,
-    ) {
-    }
+    ) {}
 
     public function index(ListTeachersRequest $request): JsonResponse
     {

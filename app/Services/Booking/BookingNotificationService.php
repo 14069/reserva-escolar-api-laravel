@@ -70,19 +70,19 @@ final class BookingNotificationService
             $feedback = trim((string) ($completionFeedback ?? ''));
 
             $title = 'Atualização de agendamento';
-            $message = $userName . ' atualizou o agendamento de ' . $resourceName . '.';
+            $message = $userName.' atualizou o agendamento de '.$resourceName.'.';
 
             if ($type === 'booking_created') {
                 $title = 'Novo agendamento criado';
-                $message = $userName . ' agendou ' . $resourceName . ' para ' . $bookingDate . '.';
+                $message = $userName.' agendou '.$resourceName.' para '.$bookingDate.'.';
             } elseif ($type === 'booking_cancelled') {
                 $title = 'Agendamento cancelado';
-                $message = $userName . ' cancelou o agendamento de ' . $resourceName . ' em ' . $bookingDate . '.';
+                $message = $userName.' cancelou o agendamento de '.$resourceName.' em '.$bookingDate.'.';
             } elseif ($type === 'booking_completed') {
                 $title = 'Agendamento finalizado';
-                $message = $userName . ' finalizou o agendamento de ' . $resourceName . '.';
+                $message = $userName.' finalizou o agendamento de '.$resourceName.'.';
                 if ($feedback !== '') {
-                    $message .= ' Feedback: ' . $feedback;
+                    $message .= ' Feedback: '.$feedback;
                 }
             }
 
@@ -107,8 +107,6 @@ final class BookingNotificationService
                 $type,
                 $title,
                 $message,
-                $resourceName,
-                $userName,
                 $metadataJson
             ): array {
                 return [

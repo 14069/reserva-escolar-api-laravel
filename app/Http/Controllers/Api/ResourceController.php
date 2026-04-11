@@ -17,8 +17,7 @@ final class ResourceController
     public function __construct(
         private readonly ResourceService $resourceService,
         private readonly ApiTokenAuthService $authService,
-    ) {
-    }
+    ) {}
 
     public function categories(Request $request): JsonResponse
     {

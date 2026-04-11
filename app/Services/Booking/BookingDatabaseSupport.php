@@ -18,7 +18,7 @@ final class BookingDatabaseSupport
 
     public function columnExists(string $tableName, string $columnName): bool
     {
-        $cacheKey = $this->getDriver() . ':' . $tableName . ':' . $columnName;
+        $cacheKey = $this->getDriver().':'.$tableName.':'.$columnName;
         if (array_key_exists($cacheKey, $this->columnExistsCache)) {
             return $this->columnExistsCache[$cacheKey];
         }
@@ -32,14 +32,14 @@ final class BookingDatabaseSupport
                   AND column_name = ?
                 LIMIT 1
             ",
-            default => "
+            default => '
                 SELECT 1
                 FROM information_schema.columns
                 WHERE table_schema = DATABASE()
                   AND table_name = ?
                   AND column_name = ?
                 LIMIT 1
-            ",
+            ',
         };
 
         $exists = DB::selectOne($query, [$tableName, $columnName]) !== null;

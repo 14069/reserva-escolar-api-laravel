@@ -177,7 +177,7 @@ class SmokeTestApiTest extends TestCase
         $token = $response->json('data.api_token');
         $schoolId = $response->json('data.school_id');
 
-        $response = $this->getJson('/bookings?school_id=' . $schoolId, [
+        $response = $this->getJson('/bookings?school_id='.$schoolId, [
             'Authorization' => "Bearer $token",
         ]);
 

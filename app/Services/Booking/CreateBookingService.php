@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Booking;
 
-use App\Models\Booking;
 use App\Models\User;
 use App\Support\ApiResponse;
 use Illuminate\Database\QueryException;
@@ -17,8 +16,7 @@ final class CreateBookingService
     public function __construct(
         private readonly BookingDatabaseSupport $databaseSupport,
         private readonly BookingNotificationService $notificationService,
-    ) {
-    }
+    ) {}
 
     public function create(array $payload, User $authUser): array
     {
@@ -200,7 +198,7 @@ final class CreateBookingService
             ->where('active', 1)
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             throw new HttpResponseException(
                 ApiResponse::error($message, 404, 'BOOKING_REFERENCE_NOT_FOUND')
             );

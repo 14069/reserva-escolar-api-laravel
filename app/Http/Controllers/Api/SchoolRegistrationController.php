@@ -13,8 +13,7 @@ final class SchoolRegistrationController
 {
     public function __construct(
         private readonly SchoolRegistrationService $schoolRegistrationService,
-    ) {
-    }
+    ) {}
 
     public function store(RegisterSchoolRequest $request): JsonResponse
     {

@@ -16,7 +16,7 @@ final class InternalAccessService
         $providedToken = trim((string) ($request->header('X-Reserva-Diagnostic-Token', $request->query('diagnostic_token', ''))));
 
         if ($configuredToken !== '') {
-            if ($providedToken === '' || !hash_equals($configuredToken, $providedToken)) {
+            if ($providedToken === '' || ! hash_equals($configuredToken, $providedToken)) {
                 throw new HttpResponseException(
                     ApiResponse::error('Acesso não autorizado.', 401, 'DIAGNOSTIC_ACCESS_DENIED')
                 );
@@ -31,7 +31,7 @@ final class InternalAccessService
             );
         }
 
-        if (!$this->isLocalRequest($request)) {
+        if (! $this->isLocalRequest($request)) {
             throw new HttpResponseException(
                 ApiResponse::error('Acesso não autorizado.', 401, 'DIAGNOSTIC_ACCESS_DENIED')
             );
@@ -44,7 +44,7 @@ final class InternalAccessService
         $providedToken = trim((string) ($request->header('X-Reserva-Cron-Token', $request->query('cron_token', ''))));
 
         if ($configuredToken !== '') {
-            if ($providedToken === '' || !hash_equals($configuredToken, $providedToken)) {
+            if ($providedToken === '' || ! hash_equals($configuredToken, $providedToken)) {
                 throw new HttpResponseException(
                     ApiResponse::error('Acesso não autorizado ao job.', 401, 'CRON_ACCESS_DENIED')
                 );
@@ -53,7 +53,7 @@ final class InternalAccessService
             return;
         }
 
-        if (!$this->isLocalRequest($request)) {
+        if (! $this->isLocalRequest($request)) {
             throw new HttpResponseException(
                 ApiResponse::error('Acesso não autorizado ao job.', 401, 'CRON_ACCESS_DENIED')
             );

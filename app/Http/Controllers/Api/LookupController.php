@@ -18,15 +18,14 @@ final class LookupController
     public function __construct(
         private readonly LookupQueryService $lookupQueryService,
         private readonly ApiTokenAuthService $authService,
-    ) {
-    }
+    ) {}
 
     public function resources(ListResourcesRequest $request): JsonResponse
     {
         $filters = $request->validated();
         $schoolId = (int) $filters['school_id'];
         $onlyActive = (bool) ($filters['only_active'] ?? true);
-        $roleRequired = !$onlyActive ? 'technician' : null;
+        $roleRequired = ! $onlyActive ? 'technician' : null;
 
         $this->authService->authenticate(
             $request,

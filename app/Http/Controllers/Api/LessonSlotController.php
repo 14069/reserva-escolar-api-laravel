@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\Catalog\LessonSlotMutationRequest;
-use App\Http\Requests\Catalog\LessonSlotStatusToggleRequest;
 use App\Http\Requests\Catalog\LessonSlotsAdminIndexRequest;
+use App\Http\Requests\Catalog\LessonSlotStatusToggleRequest;
 use App\Services\Auth\ApiTokenAuthService;
 use App\Services\Catalog\LessonSlotService;
 use App\Support\ApiResponse;
@@ -17,8 +17,7 @@ final class LessonSlotController
     public function __construct(
         private readonly LessonSlotService $lessonSlotService,
         private readonly ApiTokenAuthService $authService,
-    ) {
-    }
+    ) {}
 
     public function index(LessonSlotsAdminIndexRequest $request): JsonResponse
     {

@@ -33,7 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $exceptions->render(function (ValidationException $exception, Request $request) use ($isApiRequest) {
-            if (!$isApiRequest($request)) {
+            if (! $isApiRequest($request)) {
                 return null;
             }
 
@@ -46,7 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (NotFoundHttpException $exception, Request $request) use ($isApiRequest) {
-            if (!$isApiRequest($request)) {
+            if (! $isApiRequest($request)) {
                 return null;
             }
 
@@ -58,7 +58,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (MethodNotAllowedHttpException $exception, Request $request) use ($isApiRequest) {
-            if (!$isApiRequest($request)) {
+            if (! $isApiRequest($request)) {
                 return null;
             }
 
