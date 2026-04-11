@@ -16,6 +16,14 @@ final class ChangePasswordTest extends TestCase
     {
         parent::setUp();
 
+        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('booking_lessons');
+        Schema::dropIfExists('bookings');
+        Schema::dropIfExists('lesson_slots');
+        Schema::dropIfExists('subjects');
+        Schema::dropIfExists('class_groups');
+        Schema::dropIfExists('resources');
+        Schema::dropIfExists('resource_categories');
         Schema::dropIfExists('users');
         Schema::dropIfExists('schools');
 

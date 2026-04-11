@@ -11,14 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('schools', function (Blueprint $table) {
+            $table->id();
+            $table->string('school_name');
+            $table->string('school_code')->unique();
+            $table->string('password');
+            $table->timestamps();
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('school_id')->constrained('schools')->cascadeOnDelete();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('email');
             $table->string('password');
-            $table->rememberToken();
+            $table->string('role', 20);
+            $table->smallInteger('active')->default(1);
+            $table->string('api_token', 64)->nullable()->index();
+            $table->timestamp('api_token_expires_at')->nullable();
             $table->timestamps();
+
+            $table->unique(['school_id', 'email']);
+            $table->index(['school_id', 'role']);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -42,8 +56,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('schools');
     }
 };
