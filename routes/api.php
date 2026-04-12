@@ -178,6 +178,7 @@ Route::controller(ClassGroupController::class)->group(function (): void {
 
 Route::controller(ResourceController::class)->group(function (): void {
     Route::get('/resource-categories', 'categories')->name('compat.resource-categories.index');
+    Route::get('/resources/categories', 'categories')->name('compat.resources.categories');
     Route::post('/resources-admin', 'store')->name('compat.resources.store');
     Route::post('/resources-admin/update', 'update')->name('compat.resources.update');
     Route::post('/resources-admin/toggle-status', 'toggleStatus')->name('compat.resources.toggle-status');
@@ -189,6 +190,7 @@ Route::controller(ResourceController::class)->group(function (): void {
 });
 
 Route::controller(LessonSlotController::class)->group(function (): void {
+    Route::get('/lesson-slots', 'index')->name('compat.lesson-slots.canonical');
     Route::get('/lesson-slots-admin', 'index')->name('compat.lesson-slots.index');
     Route::post('/lesson-slots-admin', 'store')->name('compat.lesson-slots.store');
     Route::post('/lesson-slots-admin/update', 'update')->name('compat.lesson-slots.update');
