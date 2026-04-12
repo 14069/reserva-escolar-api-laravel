@@ -110,4 +110,50 @@ final class LoginApiTest extends TestCase
                 ],
             ]);
     }
+
+    public function test_login_accepts_legacy_plain_text_password_and_rehashes_it(): void
+    {
+        $schoolId = \DB::table('schools')->insertGetId([
+            'school_name' => 'Escola Legada',
+            'school_code' => 'LEG001',
+            'password' => Hash::make('school-secret'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \DB::table('users')->insert([
+            'school_id' => $schoolId,
+            'name' => 'Administrador Legado',
+            'email' => 'admin.legado@example.com',
+            'password' => 'admin123',
+            'role' => 'technician',
+            'active' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->postJson('/login', [
+            'school_code' => 'LEG001',
+            'email' => 'admin.legado@example.com',
+            'password' => 'admin123',
+        ]);
+
+        $response
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'message' => 'Login realizado com sucesso.',
+                'data' => [
+                    'school_id' => (int) $schoolId,
+                    'email' => 'admin.legado@example.com',
+                ],
+            ]);
+
+        $storedPassword = (string) \DB::table('users')
+            ->where('email', 'admin.legado@example.com')
+            ->value('password');
+
+        $this->assertNotSame('admin123', $storedPassword);
+        $this->assertTrue(Hash::check('admin123', $storedPassword));
+    }
 }
