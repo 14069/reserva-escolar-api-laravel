@@ -62,4 +62,36 @@ final class ApiRouteCompatibilityTest extends TestCase
                 ],
             ]);
     }
+
+    public function test_resource_categories_alias_is_available(): void
+    {
+        $response = $this->getJson('/resources/categories?school_id=1');
+
+        $response
+            ->assertStatus(401)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Autenticação obrigatória.',
+                'meta' => [
+                    'error_code' => 'AUTH_REQUIRED',
+                    'status_code' => 401,
+                ],
+            ]);
+    }
+
+    public function test_lesson_slots_alias_is_available(): void
+    {
+        $response = $this->getJson('/lesson-slots?school_id=1');
+
+        $response
+            ->assertStatus(401)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Autenticação obrigatória.',
+                'meta' => [
+                    'error_code' => 'AUTH_REQUIRED',
+                    'status_code' => 401,
+                ],
+            ]);
+    }
 }
