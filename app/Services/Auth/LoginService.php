@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Support\ApiResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Hash;
+use RuntimeException;
 
 final class LoginService
 {
@@ -35,7 +36,7 @@ final class LoginService
             ->where('users.active', 1)
             ->first();
 
-        if ($user === null || ! Hash::check($credentials['password'], $user->password)) {
+        if ($user === null || ! $this->passwordMatches($user, $credentials['password'])) {
             throw new HttpResponseException(
                 ApiResponse::error('Credenciais inválidas.', 401, 'LOGIN_INVALID_CREDENTIALS')
             );
@@ -54,5 +55,41 @@ final class LoginService
             'api_token' => $plainToken,
             'api_token_expires_at' => optional($user->fresh())->api_token_expires_at?->format('Y-m-d H:i:s'),
         ];
+    }
+
+    private function passwordMatches(User $user, string $plainPassword): bool
+    {
+        try {
+            if (Hash::check($plainPassword, $user->password)) {
+                if (Hash::needsRehash($user->password)) {
+                    $this->rehashPassword($user, $plainPassword);
+                }
+
+                return true;
+            }
+        } catch (RuntimeException) {
+            // Fall back for imported legacy users whose password format is not a Laravel bcrypt hash.
+        }
+
+        if (password_verify($plainPassword, $user->password)) {
+            $this->rehashPassword($user, $plainPassword);
+
+            return true;
+        }
+
+        if (hash_equals($user->password, $plainPassword)) {
+            $this->rehashPassword($user, $plainPassword);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private function rehashPassword(User $user, string $plainPassword): void
+    {
+        $user->forceFill([
+            'password' => Hash::make($plainPassword),
+        ])->save();
     }
 }
