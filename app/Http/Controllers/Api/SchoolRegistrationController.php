@@ -26,7 +26,7 @@ final class SchoolRegistrationController
             ]);
 
             $validated = $request->validated();
-            
+
             Log::info('School registration data validated', [
                 'school_code' => $validated['school_code'] ?? null,
             ]);

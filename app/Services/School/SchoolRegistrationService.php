@@ -22,10 +22,14 @@ final class SchoolRegistrationService
 
         try {
             return DB::transaction(function () use ($payload): array {
+                $timestamp = now();
+
                 $schoolId = (int) DB::table('schools')->insertGetId([
                     'school_name' => $payload['school_name'],
                     'school_code' => $payload['school_code'],
                     'password' => Hash::make($payload['school_password']),
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
                 ]);
 
                 DB::table('users')->insert([
@@ -35,6 +39,8 @@ final class SchoolRegistrationService
                     'password' => Hash::make($payload['technician_password']),
                     'role' => 'technician',
                     'active' => 1,
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
                 ]);
 
                 $categories = DB::table('resource_categories')
@@ -50,6 +56,8 @@ final class SchoolRegistrationService
                             'category_id' => $categories['chromebooks'],
                             'name' => "Carrinho de Chromebooks $i",
                             'active' => 1,
+                            'created_at' => $timestamp,
+                            'updated_at' => $timestamp,
                         ];
                     }
                 }
@@ -61,6 +69,8 @@ final class SchoolRegistrationService
                             'category_id' => $categories['audiovisual'],
                             'name' => "Recurso Audiovisual $i",
                             'active' => 1,
+                            'created_at' => $timestamp,
+                            'updated_at' => $timestamp,
                         ];
                     }
                 }
@@ -72,6 +82,8 @@ final class SchoolRegistrationService
                             'category_id' => $categories['espacos'],
                             'name' => "Espaço $i",
                             'active' => 1,
+                            'created_at' => $timestamp,
+                            'updated_at' => $timestamp,
                         ];
                     }
                 }
@@ -84,6 +96,8 @@ final class SchoolRegistrationService
                     'school_id' => $schoolId,
                     'name' => $group,
                     'active' => 1,
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
                 ], $payload['class_groups'] ?? []);
 
                 if ($classGroupRows !== []) {
@@ -94,6 +108,8 @@ final class SchoolRegistrationService
                     'school_id' => $schoolId,
                     'name' => $subject,
                     'active' => 1,
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
                 ], $payload['subjects'] ?? []);
 
                 if ($subjectRows !== []) {
@@ -107,6 +123,8 @@ final class SchoolRegistrationService
                         'lesson_number' => $i,
                         'label' => $i.'ª aula',
                         'active' => 1,
+                        'created_at' => $timestamp,
+                        'updated_at' => $timestamp,
                     ];
                 }
 

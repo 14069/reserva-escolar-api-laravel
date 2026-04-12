@@ -8,9 +8,9 @@ use App\Services\Internal\DiagnosticService;
 use App\Services\Internal\InternalAccessService;
 use App\Services\Notification\BookingReminderService;
 use App\Support\ApiResponse;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 final class InternalController
 {
