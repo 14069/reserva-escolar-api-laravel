@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Booking;
 
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
 final class BookingQueryService
@@ -53,16 +54,7 @@ final class BookingQueryService
         }
 
         if (! empty($filters['search'])) {
-            $search = '%'.$filters['search'].'%';
-            $query->where(function ($subQuery) use ($search): void {
-                $subQuery
-                    ->where('r.name', 'like', $search)
-                    ->orWhere('u.name', 'like', $search)
-                    ->orWhere('cg.name', 'like', $search)
-                    ->orWhere('s.name', 'like', $search)
-                    ->orWhere('b.purpose', 'like', $search)
-                    ->orWhereRaw("TO_CHAR(b.booking_date, 'DD/MM/YYYY') LIKE ?", [$search]);
-            });
+            $this->applySearchFilter($query, (string) $filters['search'], true);
         }
 
         $summaryBase = clone $query;
@@ -205,15 +197,7 @@ final class BookingQueryService
         }
 
         if (! empty($filters['search'])) {
-            $search = '%'.$filters['search'].'%';
-            $query->where(function ($subQuery) use ($search): void {
-                $subQuery
-                    ->where('r.name', 'like', $search)
-                    ->orWhere('cg.name', 'like', $search)
-                    ->orWhere('s.name', 'like', $search)
-                    ->orWhere('b.purpose', 'like', $search)
-                    ->orWhereRaw("TO_CHAR(b.booking_date, 'DD/MM/YYYY') LIKE ?", [$search]);
-            });
+            $this->applySearchFilter($query, (string) $filters['search'], false);
         }
 
         $orderedQuery = clone $query;
@@ -328,5 +312,68 @@ final class BookingQueryService
                 ],
             ],
         ];
+    }
+
+    private function applySearchFilter(Builder $query, string $searchTerm, bool $includeTeacher): void
+    {
+        $searchTerm = trim($searchTerm);
+        if ($searchTerm === '') {
+            return;
+        }
+
+        $searchLike = '%'.$searchTerm.'%';
+
+        $query->where(function (Builder $subQuery) use ($searchLike, $searchTerm, $includeTeacher): void {
+            $subQuery->where('r.name', 'like', $searchLike)
+                ->orWhere('cg.name', 'like', $searchLike)
+                ->orWhere('s.name', 'like', $searchLike)
+                ->orWhere('b.purpose', 'like', $searchLike);
+
+            if ($includeTeacher) {
+                $subQuery->orWhere('u.name', 'like', $searchLike);
+            }
+
+            $this->applyFormattedDateSearch($subQuery, $searchLike, $searchTerm);
+        });
+    }
+
+    private function applyFormattedDateSearch(Builder $query, string $searchLike, string $rawSearchTerm): void
+    {
+        $driver = DB::connection()->getDriverName();
+
+        $expression = match ($driver) {
+            'pgsql' => "TO_CHAR(b.booking_date, 'DD/MM/YYYY')",
+            'sqlite' => "strftime('%d/%m/%Y', b.booking_date)",
+            'mysql', 'mariadb' => "DATE_FORMAT(b.booking_date, '%d/%m/%Y')",
+            default => null,
+        };
+
+        if ($expression !== null) {
+            $query->orWhereRaw("{$expression} LIKE ?", [$searchLike]);
+
+            return;
+        }
+
+        $normalizedDate = $this->normalizeSearchDate($rawSearchTerm);
+        if ($normalizedDate !== null) {
+            $query->orWhereDate('b.booking_date', $normalizedDate);
+        }
+    }
+
+    private function normalizeSearchDate(string $rawSearchTerm): ?string
+    {
+        $rawSearchTerm = trim($rawSearchTerm);
+        if ($rawSearchTerm === '') {
+            return null;
+        }
+
+        foreach (['d/m/Y', 'Y-m-d'] as $format) {
+            $date = \DateTimeImmutable::createFromFormat($format, $rawSearchTerm);
+            if ($date !== false && $date->format($format) === $rawSearchTerm) {
+                return $date->format('Y-m-d');
+            }
+        }
+
+        return null;
     }
 }

@@ -149,4 +149,48 @@ final class ChangePasswordTest extends TestCase
         $this->assertTrue(Hash::check($newPassword, $user->password));
         $this->assertFalse(Hash::check($oldPassword, $user->password));
     }
+
+    public function test_change_password_accepts_legacy_plain_text_current_password(): void
+    {
+        $schoolId = DB::table('schools')->insertGetId([
+            'school_name' => 'Escola Teste',
+            'school_code' => 'ETI001',
+            'password' => Hash::make('school-secret'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $oldPassword = 'senha-legada-123';
+        $newPassword = 'nova-senha-456';
+
+        $userId = DB::table('users')->insertGetId([
+            'school_id' => $schoolId,
+            'name' => 'Usuário Legado',
+            'email' => 'legacy@example.com',
+            'password' => $oldPassword,
+            'role' => 'user',
+            'active' => 1,
+            'api_token' => 'legacy-token',
+            'api_token_expires_at' => now()->addHours(24),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->postJson('/account/change-password', [
+            'school_id' => $schoolId,
+            'user_id' => $userId,
+            'current_password' => $oldPassword,
+            'new_password' => $newPassword,
+        ], [
+            'Authorization' => 'Bearer legacy-token',
+        ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('success', true);
+
+        $user = DB::table('users')->where('id', $userId)->first();
+        $this->assertTrue(Hash::check($newPassword, $user->password));
+        $this->assertNotSame($oldPassword, $user->password);
+    }
 }

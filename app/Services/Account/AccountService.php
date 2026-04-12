@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Support\ApiResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Hash;
+use RuntimeException;
 
 final class AccountService
 {
@@ -35,13 +36,13 @@ final class AccountService
             );
         }
 
-        if (! Hash::check($payload['current_password'], $user->password)) {
+        if (! $this->passwordMatches((string) $payload['current_password'], (string) $user->password)) {
             throw new HttpResponseException(
                 ApiResponse::error('A senha atual informada não confere.', 401, 'ACCOUNT_CURRENT_PASSWORD_INVALID')
             );
         }
 
-        if (Hash::check($payload['new_password'], $user->password)) {
+        if ($this->passwordMatches((string) $payload['new_password'], (string) $user->password)) {
             throw new HttpResponseException(
                 ApiResponse::error('A nova senha deve ser diferente da atual.', 400, 'ACCOUNT_NEW_PASSWORD_SAME_AS_CURRENT')
             );
@@ -50,5 +51,22 @@ final class AccountService
         $user->forceFill([
             'password' => Hash::make($payload['new_password']),
         ])->save();
+    }
+
+    private function passwordMatches(string $plainPassword, string $storedPassword): bool
+    {
+        try {
+            if (Hash::check($plainPassword, $storedPassword)) {
+                return true;
+            }
+        } catch (RuntimeException) {
+            // Allow password verification for imported legacy users.
+        }
+
+        if (password_verify($plainPassword, $storedPassword)) {
+            return true;
+        }
+
+        return hash_equals($storedPassword, $plainPassword);
     }
 }
