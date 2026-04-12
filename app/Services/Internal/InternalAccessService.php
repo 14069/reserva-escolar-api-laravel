@@ -13,7 +13,7 @@ final class InternalAccessService
     public function requireDiagnosticAccess(Request $request): void
     {
         $configuredToken = trim((string) env('RESERVA_DIAGNOSTIC_TOKEN', ''));
-        $providedToken = trim((string) ($request->header('X-Reserva-Diagnostic-Token', $request->query('diagnostic_token', ''))));
+        $providedToken = trim((string) $request->header('X-Reserva-Diagnostic-Token', ''));
 
         if ($configuredToken !== '') {
             if ($providedToken === '' || ! hash_equals($configuredToken, $providedToken)) {
@@ -41,7 +41,7 @@ final class InternalAccessService
     public function requireCronAccess(Request $request): void
     {
         $configuredToken = trim((string) env('RESERVA_CRON_TOKEN', ''));
-        $providedToken = trim((string) ($request->header('X-Reserva-Cron-Token', $request->query('cron_token', ''))));
+        $providedToken = trim((string) $request->header('X-Reserva-Cron-Token', ''));
 
         if ($configuredToken !== '') {
             if ($providedToken === '' || ! hash_equals($configuredToken, $providedToken)) {

@@ -110,6 +110,15 @@ final class InternalEndpointsTest extends TestCase
         $this->assertContains($response->json('data.driver'), ['sqlite', 'pgsql', 'mysql']);
     }
 
+    public function test_diagnostic_endpoint_rejects_query_string_token(): void
+    {
+        $response = $this->getJson('/check-supabase-connection?diagnostic_token=test-diagnostic-token');
+
+        $response
+            ->assertStatus(401)
+            ->assertJsonPath('meta.error_code', 'DIAGNOSTIC_ACCESS_DENIED');
+    }
+
     public function test_booking_reminder_endpoint_requires_cron_token(): void
     {
         $response = $this->postJson('/send-booking-completion-reminders');
@@ -183,5 +192,14 @@ final class InternalEndpointsTest extends TestCase
             'type' => 'booking_reminder_complete',
             'booking_id' => $bookingId,
         ]);
+    }
+
+    public function test_booking_reminder_endpoint_rejects_query_string_token(): void
+    {
+        $response = $this->postJson('/send-booking-completion-reminders?cron_token=test-cron-token');
+
+        $response
+            ->assertStatus(401)
+            ->assertJsonPath('meta.error_code', 'CRON_ACCESS_DENIED');
     }
 }
