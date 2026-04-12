@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Notification;
 
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -44,8 +45,11 @@ final class NotificationTest extends TestCase
             $table->id();
             $table->unsignedBigInteger('school_id');
             $table->unsignedBigInteger('user_id');
+            $table->string('type')->nullable();
             $table->string('title');
             $table->string('message');
+            $table->unsignedBigInteger('booking_id')->nullable();
+            $table->text('metadata_json')->nullable();
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
@@ -143,5 +147,110 @@ final class NotificationTest extends TestCase
             ->count();
 
         $this->assertEquals(0, $unreadCount);
+    }
+
+    public function test_list_notifications_returns_iso_8601_timestamps_with_offset(): void
+    {
+        $schoolId = \DB::table('schools')->insertGetId([
+            'school_name' => 'Escola Teste',
+            'school_code' => 'ETI001',
+            'password' => Hash::make('school-secret'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $userId = \DB::table('users')->insertGetId([
+            'school_id' => $schoolId,
+            'name' => 'Usuário',
+            'email' => 'user@example.com',
+            'password' => Hash::make('secret123'),
+            'role' => 'user',
+            'active' => 1,
+            'api_token' => 'user-token',
+            'api_token_expires_at' => now()->addHours(24),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \DB::table('notifications')->insert([
+            'school_id' => $schoolId,
+            'user_id' => $userId,
+            'type' => 'booking_created',
+            'title' => 'Not 1',
+            'message' => 'Message 1',
+            'booking_id' => 10,
+            'metadata_json' => json_encode(['booking_date' => '2026-04-12']),
+            'read_at' => '2026-04-12 10:15:00',
+            'created_at' => '2026-04-12 09:30:00',
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->getJson('/notifications?school_id='.$schoolId, [
+            'Authorization' => 'Bearer user-token',
+        ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.0.created_at', '2026-04-12T09:30:00-03:00')
+            ->assertJsonPath('data.0.read_at', '2026-04-12T10:15:00-03:00');
+    }
+
+    public function test_mark_read_uses_application_clock(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 4, 12, 14, 15, 16, 'America/Araguaina'));
+
+        try {
+            $schoolId = \DB::table('schools')->insertGetId([
+                'school_name' => 'Escola Teste',
+                'school_code' => 'ETI001',
+                'password' => Hash::make('school-secret'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $userId = \DB::table('users')->insertGetId([
+                'school_id' => $schoolId,
+                'name' => 'Usuário',
+                'email' => 'user@example.com',
+                'password' => Hash::make('secret123'),
+                'role' => 'user',
+                'active' => 1,
+                'api_token' => 'user-token',
+                'api_token_expires_at' => now()->addHours(24),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $notificationId = \DB::table('notifications')->insertGetId([
+                'school_id' => $schoolId,
+                'user_id' => $userId,
+                'type' => 'booking_created',
+                'title' => 'Not 1',
+                'message' => 'Message 1',
+                'read_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $response = $this->postJson('/notifications/read?school_id='.$schoolId, [
+                'notification_id' => $notificationId,
+            ], [
+                'Authorization' => 'Bearer user-token',
+            ]);
+
+            $response->assertOk();
+
+            $storedReadAt = \DB::table('notifications')
+                ->where('id', $notificationId)
+                ->value('read_at');
+
+            $this->assertNotNull($storedReadAt);
+            $this->assertTrue(
+                Carbon::parse((string) $storedReadAt)->equalTo(now()),
+                'Expected read_at to use the Laravel application clock.'
+            );
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 }

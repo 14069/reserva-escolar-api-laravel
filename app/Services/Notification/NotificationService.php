@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Notification;
 
+use App\Support\ApiTimestamp;
 use App\Support\ApiResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
@@ -58,8 +59,8 @@ final class NotificationService
                     'message' => $row->message,
                     'booking_id' => $row->booking_id !== null ? (int) $row->booking_id : null,
                     'metadata' => $metadata,
-                    'read_at' => $row->read_at,
-                    'created_at' => $row->created_at,
+                    'read_at' => ApiTimestamp::serialize($row->read_at),
+                    'created_at' => ApiTimestamp::serialize($row->created_at) ?? '',
                 ];
             })
             ->all();
@@ -92,19 +93,22 @@ final class NotificationService
 
     public function markRead(int $schoolId, int $userId, int $notificationId): void
     {
-        $updated = DB::table('notifications')
+        $baseQuery = DB::table('notifications')
             ->where('id', $notificationId)
             ->where('school_id', $schoolId)
-            ->where('user_id', $userId)
-            ->update([
-                'read_at' => DB::raw('COALESCE(read_at, CURRENT_TIMESTAMP)'),
-            ]);
+            ->where('user_id', $userId);
 
-        if ($updated === 0) {
+        if (! (clone $baseQuery)->exists()) {
             throw new HttpResponseException(
                 ApiResponse::error('Notificação não encontrada.', 404, 'NOTIFICATION_NOT_FOUND')
             );
         }
+
+        $baseQuery
+            ->whereNull('read_at')
+            ->update([
+                'read_at' => now(),
+            ]);
     }
 
     public function markAllRead(int $schoolId, int $userId): int

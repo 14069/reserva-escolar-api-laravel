@@ -104,6 +104,49 @@ final class AuthorizationTest extends TestCase
         $this->assertTrue(in_array($response->status(), [200, 422]));
     }
 
+    public function test_teacher_listing_returns_created_at_with_explicit_timezone_offset(): void
+    {
+        $schoolId = \DB::table('schools')->insertGetId([
+            'school_name' => 'Escola Teste',
+            'school_code' => 'ETI001',
+            'password' => Hash::make('school-secret'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \DB::table('users')->insert([
+            'school_id' => $schoolId,
+            'name' => 'Técnico',
+            'email' => 'tech@example.com',
+            'password' => Hash::make('secret123'),
+            'role' => 'technician',
+            'active' => 1,
+            'api_token' => 'tech-token',
+            'api_token_expires_at' => now()->addHours(24),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \DB::table('users')->insert([
+            'school_id' => $schoolId,
+            'name' => 'Professor 1',
+            'email' => 'teacher@example.com',
+            'password' => Hash::make('secret123'),
+            'role' => 'teacher',
+            'active' => 1,
+            'created_at' => '2026-04-12 08:45:00',
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->getJson('/admin/teachers?school_id='.$schoolId, [
+            'Authorization' => 'Bearer tech-token',
+        ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.0.created_at', '2026-04-12T08:45:00-03:00');
+    }
+
     public function test_user_from_different_school_cannot_access(): void
     {
         $school1Id = \DB::table('schools')->insertGetId([

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Teacher;
 
 use App\Support\ApiResponse;
+use App\Support\ApiTimestamp;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -68,7 +69,7 @@ final class TeacherService
                 'email' => $row->email,
                 'role' => $row->role,
                 'active' => (int) $row->active,
-                'created_at' => $row->created_at,
+                'created_at' => ApiTimestamp::serialize($row->created_at) ?? '',
             ])
             ->all();
 

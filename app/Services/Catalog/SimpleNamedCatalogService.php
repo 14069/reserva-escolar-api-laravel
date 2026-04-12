@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Catalog;
 
 use App\Support\ApiResponse;
+use App\Support\ApiTimestamp;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 
@@ -57,7 +58,7 @@ abstract class SimpleNamedCatalogService
             'school_id' => (int) $row->school_id,
             'name' => $row->name,
             'active' => (int) $row->active,
-            'created_at' => $row->created_at,
+            'created_at' => ApiTimestamp::serialize($row->created_at),
         ])->all();
 
         $total = (int) ($summary->total ?? 0);
