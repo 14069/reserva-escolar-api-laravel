@@ -8,9 +8,9 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Services\Auth\ApiTokenAuthService;
 use App\Services\Auth\LoginService;
 use App\Support\ApiResponse;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 final class AuthController
 {
