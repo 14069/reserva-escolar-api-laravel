@@ -62,7 +62,6 @@ final class BookingReminderService
                 ->where('user_id', $userId)
                 ->where('type', 'booking_reminder_complete')
                 ->where('booking_id', $bookingId)
-                ->whereDate('created_at', Carbon::today())
                 ->exists();
 
             if ($alreadySent) {
