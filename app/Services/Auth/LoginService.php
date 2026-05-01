@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Support\ApiResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 final class LoginService
@@ -78,6 +79,10 @@ final class LoginService
         }
 
         if (hash_equals($user->password, $plainPassword)) {
+            Log::warning('Login com senha em texto puro detectado — migração pendente.', [
+                'user_id' => $user->id,
+                'school_id' => $user->school_id,
+            ]);
             $this->rehashPassword($user, $plainPassword);
 
             return true;

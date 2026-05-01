@@ -27,7 +27,8 @@ final class LessonSlotService
         }
 
         if (! empty($filters['search'])) {
-            $search = '%'.$filters['search'].'%';
+            $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], (string) $filters['search']);
+            $search = '%'.$escaped.'%';
             $query->where(function ($sub) use ($search): void {
                 $sub->where('label', 'like', $search)
                     ->orWhereRaw('CAST(lesson_number AS TEXT) LIKE ?', [$search])

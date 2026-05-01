@@ -429,7 +429,8 @@ final class BookingQueryService
             return;
         }
 
-        $searchLike = '%'.$searchTerm.'%';
+        $escapedTerm = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $searchTerm);
+        $searchLike = '%'.$escapedTerm.'%';
 
         $query->where(function (Builder $subQuery) use ($searchLike, $searchTerm, $includeTeacher): void {
             $subQuery->where('r.name', 'like', $searchLike)

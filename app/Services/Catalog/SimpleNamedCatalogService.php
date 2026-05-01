@@ -35,7 +35,8 @@ abstract class SimpleNamedCatalogService
         }
 
         if (! empty($filters['search'])) {
-            $query->where('name', 'like', '%'.$filters['search'].'%');
+            $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], (string) $filters['search']);
+            $query->where('name', 'like', '%'.$escaped.'%');
         }
 
         $summary = (clone $query)

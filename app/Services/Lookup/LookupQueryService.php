@@ -37,7 +37,8 @@ final class LookupQueryService
         }
 
         if (! empty($filters['search'])) {
-            $search = '%'.$filters['search'].'%';
+            $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], (string) $filters['search']);
+            $search = '%'.$escaped.'%';
             $query->where(function ($subQuery) use ($search): void {
                 $subQuery
                     ->where('r.name', 'like', $search)
