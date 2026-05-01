@@ -152,6 +152,102 @@ final class BookingQueryService
         $total = (int) ($summaryRow->total ?? 0);
         $totalPages = $pageSize > 0 ? (int) ceil($total / $pageSize) : 0;
 
+        $overallCount = $total;
+        $totalReservedLessons = 0;
+        $averageLessonsPerBooking = 0.0;
+        $busiestWeekdayLabel = null;
+        $teacherOptions = [];
+        $resourceOptions = [];
+        $classGroupOptions = [];
+        $statusOptions = [];
+        $teacherRanking = [];
+        $resourceRanking = [];
+        $classGroupRanking = [];
+        $subjectRanking = [];
+
+        if ($includeFullSummary) {
+            $baseQuery = DB::table('bookings as b')
+                ->join('resources as r', 'r.id', '=', 'b.resource_id')
+                ->join('users as u', 'u.id', '=', 'b.user_id')
+                ->join('class_groups as cg', 'cg.id', '=', 'b.class_group_id')
+                ->join('subjects as s', 's.id', '=', 'b.subject_id')
+                ->where('b.school_id', (int) $filters['school_id']);
+
+            if (! empty($filters['booking_date'])) {
+                $baseQuery->whereDate('b.booking_date', $filters['booking_date']);
+            }
+            if (! empty($filters['date_from'])) {
+                $baseQuery->whereDate('b.booking_date', '>=', $filters['date_from']);
+            }
+            if (! empty($filters['date_to'])) {
+                $baseQuery->whereDate('b.booking_date', '<=', $filters['date_to']);
+            }
+
+            $overallCount = (clone $baseQuery)->count();
+
+            $teacherOptions = (clone $baseQuery)
+                ->select('u.name')->distinct()->orderBy('u.name')
+                ->pluck('u.name')->all();
+
+            $resourceOptions = (clone $baseQuery)
+                ->select('r.name')->distinct()->orderBy('r.name')
+                ->pluck('r.name')->all();
+
+            $classGroupOptions = (clone $baseQuery)
+                ->select('cg.name')->distinct()->orderBy('cg.name')
+                ->pluck('cg.name')->all();
+
+            $statusOptions = (clone $baseQuery)
+                ->select('b.status')->distinct()
+                ->pluck('b.status')->sort()->values()->all();
+
+            $teacherRanking = (clone $query)
+                ->selectRaw('u.name as label, COUNT(*) as value')
+                ->groupBy('u.name')->orderByDesc('value')->limit(5)
+                ->get()->map(fn ($r) => ['label' => $r->label, 'value' => (int) $r->value])->all();
+
+            $resourceRanking = (clone $query)
+                ->selectRaw('r.name as label, COUNT(*) as value')
+                ->groupBy('r.name')->orderByDesc('value')->limit(5)
+                ->get()->map(fn ($r) => ['label' => $r->label, 'value' => (int) $r->value])->all();
+
+            $classGroupRanking = (clone $query)
+                ->selectRaw('cg.name as label, COUNT(*) as value')
+                ->groupBy('cg.name')->orderByDesc('value')->limit(5)
+                ->get()->map(fn ($r) => ['label' => $r->label, 'value' => (int) $r->value])->all();
+
+            $subjectRanking = (clone $query)
+                ->selectRaw('s.name as label, COUNT(*) as value')
+                ->groupBy('s.name')->orderByDesc('value')->limit(5)
+                ->get()->map(fn ($r) => ['label' => $r->label, 'value' => (int) $r->value])->all();
+
+            $totalReservedLessons = DB::table('booking_lessons')
+                ->whereIn('booking_id', (clone $query)->select('b.id'))
+                ->count();
+
+            $averageLessonsPerBooking = $total > 0
+                ? round($totalReservedLessons / $total, 2)
+                : 0.0;
+
+            $driver = DB::connection()->getDriverName();
+            $weekdayExpr = match ($driver) {
+                'pgsql' => 'EXTRACT(DOW FROM b.booking_date)',
+                'sqlite' => "CAST(strftime('%w', b.booking_date) AS INTEGER)",
+                default => 'DAYOFWEEK(b.booking_date) - 1',
+            };
+
+            $busiestRow = (clone $query)
+                ->selectRaw("{$weekdayExpr} as weekday_num, COUNT(*) as cnt")
+                ->groupByRaw($weekdayExpr)
+                ->orderByDesc('cnt')
+                ->first();
+
+            $weekdayLabels = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+            $busiestWeekdayLabel = $busiestRow !== null
+                ? ($weekdayLabels[(int) $busiestRow->weekday_num] ?? null)
+                : null;
+        }
+
         return [
             'data' => $bookings->all(),
             'meta' => [
@@ -161,6 +257,7 @@ final class BookingQueryService
                 'total_pages' => $totalPages,
                 'has_next_page' => $page < $totalPages,
                 'summary' => [
+                    'overall_count' => $overallCount,
                     'scheduled_count' => (int) ($summaryRow->scheduled_count ?? 0),
                     'completed_count' => (int) ($summaryRow->completed_count ?? 0),
                     'cancelled_count' => (int) ($summaryRow->cancelled_count ?? 0),
@@ -169,6 +266,17 @@ final class BookingQueryService
                     'unique_resources_count' => $includeFullSummary ? (int) ($summaryRow->unique_resources_count ?? 0) : null,
                     'unique_class_groups_count' => $includeFullSummary ? (int) ($summaryRow->unique_class_groups_count ?? 0) : null,
                     'unique_subjects_count' => $includeFullSummary ? (int) ($summaryRow->unique_subjects_count ?? 0) : null,
+                    'total_reserved_lessons' => $totalReservedLessons,
+                    'average_lessons_per_booking' => $averageLessonsPerBooking,
+                    'busiest_weekday_label' => $busiestWeekdayLabel,
+                    'teacher_options' => $teacherOptions,
+                    'resource_options' => $resourceOptions,
+                    'class_group_options' => $classGroupOptions,
+                    'status_options' => $statusOptions,
+                    'teacher_ranking' => $teacherRanking,
+                    'resource_ranking' => $resourceRanking,
+                    'class_group_ranking' => $classGroupRanking,
+                    'subject_ranking' => $subjectRanking,
                 ],
             ],
         ];
