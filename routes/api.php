@@ -32,23 +32,23 @@ Route::get('/health', HealthController::class)->name('health.show');
 Route::get('/health.php', HealthController::class)->name('legacy.health');
 
 Route::controller(AuthController::class)->group(function (): void {
-    Route::post('/login', 'login')->name('auth.login');
+    Route::post('/login', 'login')->name('auth.login')->middleware('throttle:5,1');
     Route::post('/logout', 'logout')->name('auth.logout');
 
-    Route::post('/login.php', 'login')->name('legacy.login');
+    Route::post('/login.php', 'login')->name('legacy.login')->middleware('throttle:5,1');
     Route::post('/logout.php', 'logout')->name('legacy.logout');
 });
 
 Route::controller(AccountController::class)->group(function (): void {
-    Route::post('/account/change-password', 'changePassword')->name('account.change-password');
-    Route::post('/change-my-password', 'changePassword')->name('compat.account.change-password');
-    Route::post('/change_my_password.php', 'changePassword')->name('legacy.change-my-password');
+    Route::post('/account/change-password', 'changePassword')->name('account.change-password')->middleware('throttle:5,1');
+    Route::post('/change-my-password', 'changePassword')->name('compat.account.change-password')->middleware('throttle:5,1');
+    Route::post('/change_my_password.php', 'changePassword')->name('legacy.change-my-password')->middleware('throttle:5,1');
 });
 
 Route::controller(SchoolRegistrationController::class)->group(function (): void {
-    Route::post('/schools/register', 'store')->name('schools.register');
-    Route::post('/register-school', 'store')->name('compat.schools.register');
-    Route::post('/register_school.php', 'store')->name('legacy.register-school');
+    Route::post('/schools/register', 'store')->name('schools.register')->middleware('throttle:3,1');
+    Route::post('/register-school', 'store')->name('compat.schools.register')->middleware('throttle:3,1');
+    Route::post('/register_school.php', 'store')->name('legacy.register-school')->middleware('throttle:3,1');
 });
 
 Route::controller(InternalController::class)->group(function (): void {
@@ -65,13 +65,13 @@ Route::controller(InternalController::class)->group(function (): void {
 Route::controller(BookingController::class)->group(function (): void {
     Route::get('/bookings', 'index')->name('bookings.index');
     Route::get('/my-bookings', 'myBookings')->name('bookings.mine');
-    Route::post('/bookings', 'store')->name('bookings.store');
+    Route::post('/bookings', 'store')->name('bookings.store')->middleware('throttle:20,1');
     Route::post('/bookings/cancel', 'cancel')->name('bookings.cancel');
     Route::post('/bookings/complete', 'complete')->name('bookings.complete');
 
     Route::get('/get_all_bookings.php', 'index')->name('legacy.bookings.index');
     Route::get('/get_my_bookings.php', 'myBookings')->name('legacy.bookings.mine');
-    Route::post('/create_booking.php', 'store')->name('legacy.bookings.store');
+    Route::post('/create_booking.php', 'store')->name('legacy.bookings.store')->middleware('throttle:20,1');
     Route::post('/cancel_booking.php', 'cancel')->name('legacy.bookings.cancel');
     Route::post('/complete_booking.php', 'complete')->name('legacy.bookings.complete');
 });
