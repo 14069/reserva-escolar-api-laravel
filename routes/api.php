@@ -12,6 +12,9 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ResourceController;
 use App\Http\Controllers\Api\SchoolRegistrationController;
 use App\Http\Controllers\Api\SubjectController;
+use App\Http\Controllers\Api\SystemAdminAuthController;
+use App\Http\Controllers\Api\SystemAdminMetricsController;
+use App\Http\Controllers\Api\SystemAdminSchoolController;
 use App\Http\Controllers\Api\TeacherController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +23,19 @@ Route::get('/health', HealthController::class)->name('health.show');
 Route::controller(AuthController::class)->group(function (): void {
     Route::post('/login', 'login')->name('auth.login')->middleware('throttle:5,1');
     Route::post('/logout', 'logout')->name('auth.logout');
+});
+
+Route::prefix('system-admin')->name('system-admin.')->group(function (): void {
+    Route::controller(SystemAdminAuthController::class)->group(function (): void {
+        Route::post('/login', 'login')->name('login')->middleware('throttle:5,1');
+        Route::post('/logout', 'logout')->name('logout');
+    });
+
+    Route::get('/schools', [SystemAdminSchoolController::class, 'index'])->name('schools.index');
+    Route::get('/schools/{school}', [SystemAdminSchoolController::class, 'show'])->name('schools.show');
+    Route::post('/schools/{school}/toggle-status', [SystemAdminSchoolController::class, 'toggleStatus'])->name('schools.toggle-status');
+
+    Route::get('/metrics', [SystemAdminMetricsController::class, 'index'])->name('metrics');
 });
 
 Route::post('/account/change-password', [AccountController::class, 'changePassword'])

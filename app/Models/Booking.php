@@ -43,6 +43,11 @@ final class Booking extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function school(): BelongsTo
+    {
+        return $this->belongsTo(School::class);
+    }
+
     public function resource(): BelongsTo
     {
         return $this->belongsTo(Resource::class);
@@ -56,6 +61,16 @@ final class Booking extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function completedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'completed_by_user_id');
+    }
+
+    public function cancelledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by_user_id');
     }
 
     public function lessons(): BelongsToMany

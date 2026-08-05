@@ -33,6 +33,7 @@ final class User extends Model
         return [
             'api_token_expires_at' => 'datetime',
             'active' => 'integer',
+            'password' => 'hashed',
         ];
     }
 

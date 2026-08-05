@@ -30,6 +30,7 @@ final class LoginService
                 'users.active',
                 'schools.school_name',
                 'schools.school_code',
+                'schools.active as school_active',
             ])
             ->join('schools', 'schools.id', '=', 'users.school_id')
             ->where('schools.school_code', $credentials['school_code'])
@@ -40,6 +41,16 @@ final class LoginService
         if ($user === null || ! $this->passwordMatches($user, $credentials['password'])) {
             throw new HttpResponseException(
                 ApiResponse::error('Credenciais inválidas.', 401, 'LOGIN_INVALID_CREDENTIALS')
+            );
+        }
+
+        if (! (bool) $user->school_active) {
+            throw new HttpResponseException(
+                ApiResponse::error(
+                    'Esta escola está suspensa. Entre em contato com o administrador da plataforma.',
+                    403,
+                    'SCHOOL_SUSPENDED'
+                )
             );
         }
 
