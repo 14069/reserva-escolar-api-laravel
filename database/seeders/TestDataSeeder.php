@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\School;
+use App\Models\SystemAdmin;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -46,6 +47,28 @@ class TestDataSeeder extends Seeder
                 'name' => 'Admin CI',
                 'password' => Hash::make('teste123'),
                 'role' => 'admin',
+                'active' => true,
+            ]
+        );
+
+        // Create test teacher user
+        User::firstOrCreate(
+            ['email' => 'professor.ci@example.com'],
+            [
+                'school_id' => $school->id,
+                'name' => 'Professor CI',
+                'password' => Hash::make('teste123'),
+                'role' => 'teacher',
+                'active' => true,
+            ]
+        );
+
+        // Create test system admin
+        SystemAdmin::firstOrCreate(
+            ['email' => 'admin.geral.ci@example.com'],
+            [
+                'name' => 'Admin Geral CI',
+                'password' => Hash::make('teste123'),
                 'active' => true,
             ]
         );
