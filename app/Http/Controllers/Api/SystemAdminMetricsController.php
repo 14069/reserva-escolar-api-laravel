@@ -29,7 +29,7 @@ final class SystemAdminMetricsController
                 DB::raw('COUNT(*) as total'),
                 DB::raw('SUM(CASE WHEN active = true THEN 1 ELSE 0 END) as active_count'),
                 DB::raw('SUM(CASE WHEN active = false THEN 1 ELSE 0 END) as suspended_count'),
-                DB::raw('SUM(CASE WHEN created_at >= \'' . $startOfMonth->toDateTimeString() . '\' THEN 1 ELSE 0 END) as new_this_month'),
+                DB::raw('SUM(CASE WHEN created_at >= \''.$startOfMonth->toDateTimeString().'\' THEN 1 ELSE 0 END) as new_this_month'),
             )
             ->first();
 
@@ -47,7 +47,7 @@ final class SystemAdminMetricsController
                 DB::raw('SUM(CASE WHEN status = \'pending\' THEN 1 ELSE 0 END) as pending'),
                 DB::raw('SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed'),
                 DB::raw('SUM(CASE WHEN status = \'cancelled\' THEN 1 ELSE 0 END) as cancelled'),
-                DB::raw('SUM(CASE WHEN created_at >= \'' . $startOfMonth->toDateTimeString() . '\' THEN 1 ELSE 0 END) as this_month'),
+                DB::raw('SUM(CASE WHEN created_at >= \''.$startOfMonth->toDateTimeString().'\' THEN 1 ELSE 0 END) as this_month'),
             )
             ->first();
 
