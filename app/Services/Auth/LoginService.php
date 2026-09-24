@@ -9,6 +9,7 @@ use App\Support\ApiResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 
 final class LoginService
@@ -19,19 +20,25 @@ final class LoginService
 
     public function login(array $credentials): array
     {
+        $schoolHasActiveColumn = Schema::hasColumn('schools', 'active');
+        $columns = [
+            'users.id',
+            'users.school_id',
+            'users.name',
+            'users.email',
+            'users.password',
+            'users.role',
+            'users.active',
+            'schools.school_name',
+            'schools.school_code',
+        ];
+
+        if ($schoolHasActiveColumn) {
+            $columns[] = 'schools.active as school_active';
+        }
+
         $user = User::query()
-            ->select([
-                'users.id',
-                'users.school_id',
-                'users.name',
-                'users.email',
-                'users.password',
-                'users.role',
-                'users.active',
-                'schools.school_name',
-                'schools.school_code',
-                'schools.active as school_active',
-            ])
+            ->select($columns)
             ->join('schools', 'schools.id', '=', 'users.school_id')
             ->where('schools.school_code', $credentials['school_code'])
             ->where('users.email', $credentials['email'])
@@ -44,7 +51,7 @@ final class LoginService
             );
         }
 
-        if (! (bool) $user->school_active) {
+        if ($schoolHasActiveColumn && ! (bool) $user->school_active) {
             throw new HttpResponseException(
                 ApiResponse::error(
                     'Esta escola está suspensa. Entre em contato com o administrador da plataforma.',
