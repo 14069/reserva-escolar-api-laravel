@@ -4,11 +4,15 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
         git \
+        libicu-dev \
         libpq-dev \
+        libzip-dev \
         unzip \
     && docker-php-ext-install \
         bcmath \
+        intl \
         pdo_pgsql \
+        zip \
     && curl -fsSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
